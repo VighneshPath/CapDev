@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-golang-app-deployment
+spec:
+  replicas: 3  # Number of desired replicas
+  selector:
+    matchLabels:
+      app: my-golang-app
+  template:
+    metadata:
+      labels:
+        app: my-golang-app
+    spec:
+      containers:
+        - name: my-golang-app
+          image: nerflongshotuv/capdev-a4
+          env:
+          - name: TATKAL_BUSY_TIME
+            value: "true"
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path : /
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 3
