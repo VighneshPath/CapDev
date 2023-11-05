@@ -1,0 +1,60 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: deployment-manager-role
+rules:
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "update", "patch"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: checker-boi
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: deployment-manager-binding
+subjects:
+- kind: ServiceAccount
+  name: checker-boi
+  namespace: default
+roleRef:
+  kind: Role
+  name: deployment-manager-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: check-window
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: check-deployment-window
+  template:
+    metadata:
+      labels:
+        app: check-deployment-window
+    spec:
+      serviceAccountName: checker-boi
+      containers:
+      - name: check-config
+        image: bitnami/kubectl:latest
+        command: ["/bin/sh", "-c"]
+        args: 
+        - |
+            while true; do
+              window_state=$(kubectl get configmap tatkal-window-config -n default -o=jsonpath='{.data.current_window_status}')
+              if [ "$window_state" = "open" ]; then
+                kubectl rollout pause deployment/my-golang-app-deployment
+              else
+                kubectl rollout resume deployment/my-golang-app-deployment
+              fi
+              sleep 0.5
+            done > /dev/null 2>&1

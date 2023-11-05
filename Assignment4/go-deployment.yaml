@@ -16,13 +16,7 @@ spec:
         - name: my-golang-app
           image: nerflongshotuv/capdev-a4
           env:
-          - name: TATKAL_BUSY_TIME
+          - name: TEST 
             value: "true"
           ports:
             - containerPort: 8080
-          readinessProbe:
-            httpGet:
-              path : /
-              port: 8080
-            initialDelaySeconds: 3
-            periodSeconds: 3

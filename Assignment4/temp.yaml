@@ -1,0 +1,8 @@
+apiVersion: v1
+data:
+  current_window_status: closed
+kind: ConfigMap
+metadata:
+  annotations:
+  name: tatkal-window-config
+  namespace: default
